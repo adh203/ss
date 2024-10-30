@@ -12,12 +12,6 @@ void main()
   f3=fopen("out1.txt","w");
   f4=fopen("sym1.txt","w");
 
-  if (f1 == NULL || f2 == NULL || f3 == NULL || f4 == NULL) 
-  {
-        printf("Error opening files.\n");
-        return;
-  }
-
   while(fscanf(f1,"%s%s%s",lab,opcode,opa)!=EOF)
   {
     if(strcmp(lab,"**")==0)
