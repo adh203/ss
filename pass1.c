@@ -1,22 +1,32 @@
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 void main()
 {
   FILE *f1,*f2,*f3,*f4;
   char s[100],lab[30],opcode[30],opa[30],opcode1[30],opa1[30];
-  int locctr,x=0;
+  int locctr,x=0,start,len;
+
   f1=fopen("input.txt","r");
   f2=fopen("opcode.txt","r");
   f3=fopen("out1.txt","w");
   f4=fopen("sym1.txt","w");
+
+  if (f1 == NULL || f2 == NULL || f3 == NULL || f4 == NULL) 
+  {
+        printf("Error opening files.\n");
+        return;
+  }
+
   while(fscanf(f1,"%s%s%s",lab,opcode,opa)!=EOF)
   {
     if(strcmp(lab,"**")==0)
     {
       if(strcmp(opcode,"START")==0)
       {
-        fprintf(f3,"%s %s %s",lab,opcode,opa);
+        fprintf(f3,"%s%s%s",lab,opcode,opa);
         locctr=(atoi(opa));
+        start=locctr;
       }
       else
       {
@@ -27,6 +37,7 @@ void main()
           if(strcmp(opcode,opcode1)==0)
           {
             x=1;
+            break;
           }
         }
         if(x==1)
@@ -70,4 +81,12 @@ void main()
       }
     }
   }
+  len=locctr-start;
+  fprintf(f3,"Program length:%d",len);
+  printf("Program length:%d\n",len);
+
+  fclose(f1);
+  fclose(f2);
+  fclose(f3);
+  fclose(f4);
 }
