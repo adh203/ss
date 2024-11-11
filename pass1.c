@@ -1,86 +1,71 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-void main()
+#include <string.h>
+
+void main() 
 {
-  FILE *f1,*f2,*f3,*f4;
-  char s[100],lab[30],opcode[30],opa[30],opcode1[30],opa1[30];
-  int locctr,x=0,start,len;
+    char label[10], operand[10], opcode[10];
+    char code[10], mnemonic[10];
+    int start, locctr;
+    FILE *input, *optab, *output, *symtab;
 
-  f1=fopen("input.txt","r");
-  f2=fopen("opcode.txt","r");
-  f3=fopen("out1.txt","w");
-  f4=fopen("sym1.txt","w");
+    input = fopen ("input.txt", "r");
+    optab = fopen ("optab.txt", "r");
+    output = fopen ("output.txt", "w");
+    symtab = fopen ("symtab.txt", "w");
 
-  while(fscanf(f1,"%s%s%s",lab,opcode,opa)!=EOF)
-  {
-    if(strcmp(lab,"**")==0)
+    fscanf (input, "%s\t%s\t%s", label, opcode, operand);
+    if (strcmp (opcode , "START") == 0) 
     {
-      if(strcmp(opcode,"START")==0)
-      {
-        fprintf(f3,"%s%s%s",lab,opcode,opa);
-        locctr=(atoi(opa));
-        start=locctr;
-      }
-      else
-      {
-        rewind(f2); 
-        x=0;
-        while(fscanf(f2,"%s%s",opcode1,opa1)!=EOF)
-        {
-          if(strcmp(opcode,opcode1)==0)
-          {
-            x=1;
-            break;
-          }
-        }
-        if(x==1)
-        {
-          fprintf(f3,"\n %d %s %s %s",locctr,lab,opcode,opa);
-          locctr=locctr+3;
-        }
-      }
-    }
-    else
+        locctr = atoi (operand);
+        start = locctr;
+        fprintf (output, "\t%s\t%s\t%s\n",label, opcode, operand);
+        fscanf (input, "%s\t%s\t%s",label, opcode, operand);
+    } 
+    else 
     {
-      if(strcmp(opcode,"RESW")==0)
-      {
-        fprintf(f3,"\n %d %s %s %s",locctr,lab,opcode,opa);
-        fprintf(f4,"\n %d %s",locctr,lab);
-        locctr=locctr+(3*(atoi(opa)));
-      }
-      else if(strcmp(opcode,"WORD")==0)
-      {
-        fprintf(f3,"\n %d %s %s %s",locctr,lab,opcode,opa);
-        fprintf(f4,"\n %d %s",locctr,lab);
-        locctr=locctr+3;
-      }
-      else if(strcmp(opcode,"BYTE")==0)
-      {
-        fprintf(f3,"\n %d %s %s %s",locctr,lab,opcode,opa);
-        fprintf(f4,"\n %d %s",locctr,lab);
-        locctr=locctr+1;
-      }
-      else if(strcmp(opcode,"RESB")==0)
-      {
-        fprintf(f3,"\n %d %s %s %s",locctr,lab,opcode,opa);
-        fprintf(f4,"\n %d %s",locctr,lab);
-        locctr=locctr+1;
-      }
-      else
-      {
-        fprintf(f3,"\n %d %s %s %s",locctr,lab,opcode,opa);
-        fprintf(f4,"\n %d %s",locctr,lab);
-        locctr=locctr+(atoi(opa));
-      }
+        locctr = 0;
+        start = 0;
     }
-  }
-  len=locctr-start;
-  fprintf(f3,"Program length:%d",len);
-  printf("Program length:%d\n",len);
 
-  fclose(f1);
-  fclose(f2);
-  fclose(f3);
-  fclose(f4);
+    while (strcmp (opcode, "END") != 0) 
+    {
+        fprintf (output, "%d\t",locctr);
+
+        if (strcmp (label, "") != 0 && strcmp (label, "**") != 0) 
+        {
+            fprintf (symtab, "%s\t%d\n",label, locctr);
+        }
+
+        fscanf (optab, "%s\t%s",code, mnemonic);
+        while (strcmp (code, "END") != 0) 
+        {
+            if (strcmp (code, opcode) == 0) 
+            {
+                locctr += 3;
+                break;
+            }
+            fscanf (optab, "%s\t%s",code, mnemonic);
+        }
+
+        if (strcmp (opcode, "WORD") == 0)
+            locctr += 3;
+        else if (strcmp (opcode, "RESW") == 0)
+            locctr += (3 * atoi (operand));
+        else if (strcmp (opcode, "RESB") == 0)
+            locctr += atoi (operand);
+        else if (strcmp (opcode, "BYTE") == 0)
+              ++locctr;
+
+        fprintf (output, "\t%s\t%s\t%s\n",label, opcode, operand);
+        fscanf (input, "%s\t%s\t%s",label, opcode, operand);
+    }
+
+    fprintf (output, "%d\t%s\t%s\t%s\n",locctr,label, opcode, operand);
+    printf("\nProgram Size : %d\n", locctr - start);
+
+    fclose (input);
+    fclose (optab);
+    fclose (output);
+    fclose (symtab);
 }
